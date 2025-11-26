@@ -1,0 +1,174 @@
+-- Nivel 1--
+-- Ejercicio 1--
+CREATE TABLE credit_card (
+    id VARCHAR(15) PRIMARY KEY,
+    iban VARCHAR(100) NOT NULL,
+    pan VARCHAR(100) NOT NULL,
+    pin VARCHAR(8) NOT NULL,
+    expiring_date VARCHAR(20),
+    cvv VARCHAR(4)
+);
+
+
+
+ALTER TABLE transaction
+ADD CONSTRAINT fk_con_credit_card
+FOREIGN KEY (credit_card_id)
+REFERENCES credit_card(id);
+
+SELECT *
+FROM credit_card;
+
+
+-- Ejercicio 2--
+SELECT iban
+FROM credit_card
+WHERE id = 'CcU-2938';
+
+UPDATE credit_card
+SET iban = 'TR323456312213576817699999' 
+WHERE id = 'CcU-2938';
+-- Ejercicio 3--
+INSERT INTO company (id, company_name, phone, email, country, website) 
+VALUES ('b-9999', 'SS Metal Incorporated', '06 85 56 52 35', 'conec.porttitor.tellus@yahoo.net', 'Germany', 'https://instagram.com/site')
+;
+INSERT INTO credit_card (id, iban, pan, pin,cvv, expiring_date )
+VALUES ('CcU-9999', 'TR123456789012345678901235', '1234567890123458', '1235', '878','2030-12-21' );
+
+
+INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address)
+VALUES ("9999", "Remedios", "Case", "055 3114 1566", "mollis.phasellus.libero@aol.com", "Oct 9, 1994", "United Kingdom", "Liverpool", "L1 1AA", "479-3690 Turpis Road");
+
+
+
+INSERT INTO transaction (id,credit_card_id,
+company_id,user_id,lat,longitude,amount,declined)
+VALUES('08B1D1D-5B23-A76C-55EF-C568E49A99DD',
+'CcU-9999','b-9999','9999','829.999','-117.999','111.11','0'
+);
+
+SELECT*FROM transaction
+WHERE id = '08B1D1D-5B23-A76C-55EF-C568E49A99DD';
+
+-- Ejercicio 4--
+ALTER TABLE credit_card
+DROP COLUMN pan;
+
+SELECT*FROM credit_card;
+
+
+   -- NIVEL_2 --
+   -- Ejercicio 1 --
+SELECT*FROM transaction
+WHERE id = "000447FE-B650-4DCF-85DE-C7ED0EE1CAAD";
+
+DELETE FROM transaction
+WHERE id ="000447FE-B650-4DCF-85DE-C7ED0EE1CAAD";
+
+
+
+    -- Ejercicio 2 --
+
+CREATE VIEW VistaMarketing AS
+SELECT 
+    c.company_name      AS company_name,
+    c.phone             AS phone,
+    c.country           AS country,
+    ROUND (AVG(t.amount),2)     AS avg_purchase_volume
+FROM company c
+JOIN transaction t 
+    ON c.id = t.company_id
+GROUP BY 
+    c.company_name, 
+    c.phone, 
+    c.country
+    ORDER BY 
+    AVG(t.amount) DESC;
+
+CREATE OR REPLACE VIEW VistaMarketing AS
+SELECT
+c.company_name      AS company_name,
+    c.phone             AS phone,
+    c.country           AS country,
+    ROUND (AVG(t.amount),2)     AS avg_purchase_volume
+FROM company c
+JOIN transaction t 
+    ON c.id = t.company_id
+GROUP BY 
+    c.company_name, 
+    c.phone, 
+    c.country
+    ORDER BY 
+    AVG(t.amount) DESC;
+
+	SELECT*FROM VistaMarketing;
+
+
+  -- Ejercicio 3 --
+  
+  SELECT*FROM  VistaMarketing
+  WHERE country = "Germany"
+  LIMIT 5;
+    
+    -- Nivel 3--
+
+    -- Ejercicio 1--
+    
+-- Modificamos y renombramos datos de tabla Transaction para que se queda igual que se demuestra en el diagrama de companero--
+ALTER TABLE transaction
+MODIFY COLUMN user_id INT,
+MODIFY column credit_card_id VARCHAR(20);
+
+-- Modificamos y renombramos datos de tabla User para que se queda igual que se demuestra en el diagrama de companero--
+ALTER TABLE user
+MODIFY column id INT,
+RENAME column email TO personal_email;
+-- Renombramos tabla User por Data_user --
+ALTER TABLE user RENAME TO data_user;
+
+-- Modificamos y renombramos datos de tabla Credit_card para que se queda igual que se demuestra en el diagrama de companero
+ALTER TABLE credit_card
+MODIFY column id VARCHAR(20),
+MODIFY column iban VARCHAR(50),
+MODIFY column pin VARCHAR(4),
+MODIFY column cvv INT,
+ADD column fecha_actual DATE;
+
+-- Eliminamos columna Website Company para que se queda igual que se demuestra en el diagrama de companero --
+ALTER TABLE company
+DROP column website;
+
+--  Aplicar la restricción FK 
+ALTER TABLE transaction 
+ADD CONSTRAINT fk_transaction_user 
+FOREIGN KEY (user_id) 
+REFERENCES data_user(id);
+
+-- Comprobando --
+    SELECT*FROM data_user
+    LIMIT 20;
+   
+-- Ejercicio 2--
+CREATE VIEW InformeTecnico AS
+SELECT 
+t.id AS "ID de la transaction",
+u.name AS "Nombre del usario/a",
+u.surname AS "Apellido del usario/a",
+cc.iban AS "IBAN de la tarjeta de credito",
+c.company_name AS "Nombre de la compania"
+FROM 
+transaction t 
+JOIN 
+   user u ON t.user_id=u.id
+JOIN
+   credit_card cc ON t.credit_card_id= cc.id
+JOIN
+   company c ON t.company_id=c.id
+   ORDER BY t.id DESC;
+   
+   
+   
+SELECT*FROM InformeTecnico;
+
+
+
